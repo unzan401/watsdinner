@@ -5,8 +5,8 @@
         <div class="col-12">
           資料庫已經有的分類問題：
           <ol>
-            <li v-for="question in questions" :key="question.id">
-              {{ question }}
+            <li v-for="(question, index) in questions" :key="question.id">
+              <a href="#" @click="changeQuestion(index)">{{ question }}</a>
             </li>
           </ol>
         </div>
@@ -48,11 +48,7 @@
           </button>
         </div>
       </div>
-      <div class="row bg-white" style="position: sticky; top: 50px">
-        <div
-          class="w-100"
-          style="height: 1px; background-color: #bbbbbb; margin: 5px 0"
-        ></div>
+      <div class="row bg-white" style="position: sticky; top: 50px;padding:10px 0;margin-top:10px;margin-bottom:10px;border-top:#DDDDDD 1px solid;border-bottom:#DDDDDD 1px solid;">
         <h3 class="mt-2">預覽</h3>
         <h1>{{ data.question }}</h1>
         <div class="col-6">
@@ -66,57 +62,52 @@
           </button>
         </div>
       </div>
-      <div
-        class="w-100"
-        style="height: 1px; background-color: #bbbbbb; margin: 15px 0"
-      ></div>
       <div class="row" v-if="typein">
         <div class="col-12">
           <h4>請勾選符合問題的食物</h4>
         </div>
         <table class="w-100">
-          <tr class="fooditems" v-for="num in foods.length" :key="num.id">
-            <td class="text-end">{{ foods[num-1] }}</td>
+          <tr class="fooditems" v-for="(food, index) in foods" :key="food.id">
+            <td class="text-end">{{ food }}</td>
             <td>
               <div class="form-check form-check-inline">
-                <input 
-                  :name="'radio'+num"
+                <input
+                  :name="'radio' + index"
                   type="radio"
-                  :id="'radio'+num+'1'"
-                  value=1
-                  v-model="foodstype[num-1]"
+                  :id="'radio' + index + '1'"
+                  value="1"
+                  v-model="foodstype[index]"
                 />
-                <label 
+                <label
                   class="form-check-label"
-                  :for="'radio'+num+'1'"
+                  :for="'radio' + index + '1'"
                   style="margin-right: 3rem"
-                  
                   >{{ data.Answer1 }}
-                  
-                  </label>
-                <input 
-                  :name="'radio'+num"
+                </label>
+                <input
+                  :name="'radio' + index"
                   type="radio"
-                  :id="'radio'+num+'2'"
-                  value=0
-                  v-model="foodstype[num-1]"
+                  :id="'radio' + index + '2'"
+                  value="0"
+                  v-model="foodstype[index]"
                   checked
                 />
                 <label
                   class="form-check-label"
-                  :for="'radio'+num+'2'"
+                  :for="'radio' + index + '2'"
                   style="margin-right: 3rem"
                   >{{ data.Answer2 }}</label
                 >
-                <input 
-                  :name="'radio'+num"
+                <input
+                  :name="'radio' + index"
                   type="radio"
-                  :id="'radio'+num+'3'" 
-                  value="nvm" 
-                  v-model="foodstype[num-1]"/>
+                  :id="'radio' + index + '3'"
+                  value="nvm"
+                  v-model="foodstype[index]"
+                />
                 <label
                   class="form-check-label"
-                  :for="'radio'+num+'3'"
+                  :for="'radio' + index + '3'"
                   style="margin-right: 3rem"
                   >兩個選項都符合</label
                 >
@@ -131,7 +122,7 @@
           ></div>
           <p>{{ data.Answer1 }}：{{ data.tagsfoods }}</p>
           <p>兩項都符合的食物：{{ data.independentfoods }}</p>
-          <button type="button"  @click="update()" class="btn btn-success w-100">
+          <button type="button" @click="update()" class="btn btn-success w-100">
             確定
           </button>
         </div>
@@ -156,18 +147,18 @@ export default {
         independentfoods: [],
       },
       foods: [],
-      foodstype:[],
+      foodstype: [],
       len: 0,
       questions: [],
     };
   },
-  watch:{
+  watch: {
     foodstype: {
-      handler:function(){
+      handler: function () {
         this.checkAnswer();
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   methods: {
     typeinStart: function () {
@@ -181,14 +172,43 @@ export default {
         alert("請輸入問題與其回答選項！");
       }
     },
+    changeQuestion: function (index) {
+      firebase
+        .database()
+        .ref("watsdinner/data")
+        .once("value", (snapshot) => {
+          this.data = snapshot.val()[index];
+          this.foodstype = this.foodstype.map((x, index) => {
+            if (this.data.tagsfoods.includes(this.foods[index])) {
+              return "1";
+            } else if (this.data.independentfoods.includes(this.foods[index])) {
+              return "nvm";
+            } else {
+              return "0";
+            }
+          });
+        });
+      this.typein = true;
+      this.changein = true;
+      this.questionIndex = index;
+    },
     checkAnswer: function () {
-      this.data.tagsfoods=this.foods.filter(food=>this.foodstype[this.foods.indexOf(food)]=="1")
-      this.data.independentfoods=this.foods.filter(food=>this.foodstype[this.foods.indexOf(food)]=="nvm")
+      this.data.tagsfoods = this.foods.filter(
+        (food) => this.foodstype[this.foods.indexOf(food)] == "1"
+      );
+      this.data.independentfoods = this.foods.filter(
+        (food) => this.foodstype[this.foods.indexOf(food)] == "nvm"
+      );
     },
     update: function () {
       var Ref = {};
-      Ref[this.len] = this.data;
+      if (this.changein) {
+        Ref[this.questionIndex] = this.data;
+      } else {
+        Ref[this.len] = this.data;
+      }
       firebase.database().ref("watsdinner/data").update(Ref);
+
       this.refresh();
     },
     refresh: function () {
@@ -198,7 +218,7 @@ export default {
         .once("value", (snapshot) => {
           this.foods = snapshot.val();
           this.foods = this.foods.map((item) => item.name);
-          this.foodstype= this.foods.map(() => "0");
+          this.foodstype = this.foods.map(() => "0");
         });
       firebase
         .database()
@@ -224,7 +244,7 @@ export default {
       .once("value", (snapshot) => {
         this.foods = snapshot.val();
         this.foods = this.foods.map((item) => item.name);
-        this.foodstype= this.foods.map(() => "0");
+        this.foodstype = this.foods.map(() => "0");
       });
 
     firebase
