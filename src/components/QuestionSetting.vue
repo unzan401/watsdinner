@@ -5,9 +5,9 @@
         <div class="col-12">
           資料庫已經有的分類問題：
           <ol>
-          <li v-for="question in questions" :key="question.id">
-            {{ question }}
-          </li>
+            <li v-for="question in questions" :key="question.id">
+              {{ question }}
+            </li>
           </ol>
         </div>
         <div class="col-12">
@@ -48,7 +48,7 @@
           </button>
         </div>
       </div>
-      <div class="row bg-white" style="position:sticky;top:50px">
+      <div class="row bg-white" style="position: sticky; top: 50px">
         <div
           class="w-100"
           style="height: 1px; background-color: #bbbbbb; margin: 5px 0"
@@ -74,17 +74,64 @@
         <div class="col-12">
           <h4>請勾選符合問題的食物</h4>
         </div>
-        <div class="col-12 fooditems" v-for="item in foods" :key="item.id">
-          {{ item }}
-          <input type="checkbox" @click="checkAnswer(item)" />
-        </div>
+        <table class="w-100">
+          <tr class="fooditems" v-for="num in foods.length" :key="num.id">
+            <td class="text-end">{{ foods[num-1] }}</td>
+            <td>
+              <div class="form-check form-check-inline">
+                <input 
+                  :name="'radio'+num"
+                  type="radio"
+                  :id="'radio'+num+'1'"
+                  value=1
+                  v-model="foodstype[num-1]"
+                />
+                <label 
+                  class="form-check-label"
+                  :for="'radio'+num+'1'"
+                  style="margin-right: 3rem"
+                  
+                  >{{ data.Answer1 }}
+                  
+                  </label>
+                <input 
+                  :name="'radio'+num"
+                  type="radio"
+                  :id="'radio'+num+'2'"
+                  value=0
+                  v-model="foodstype[num-1]"
+                  checked
+                />
+                <label
+                  class="form-check-label"
+                  :for="'radio'+num+'2'"
+                  style="margin-right: 3rem"
+                  >{{ data.Answer2 }}</label
+                >
+                <input 
+                  :name="'radio'+num"
+                  type="radio"
+                  :id="'radio'+num+'3'" 
+                  value="nvm" 
+                  v-model="foodstype[num-1]"/>
+                <label
+                  class="form-check-label"
+                  :for="'radio'+num+'3'"
+                  style="margin-right: 3rem"
+                  >兩個選項都符合</label
+                >
+              </div>
+            </td>
+          </tr>
+        </table>
         <div class="col-12">
           <div
             class="w-100"
             style="height: 1px; background-color: #bbbbbb; margin: 3px"
           ></div>
-          <p>已選中：{{ data.tagsfoods }}</p>
-          <button type="button" @click="update()" class="btn btn-success w-100">
+          <p>{{ data.Answer1 }}：{{ data.tagsfoods }}</p>
+          <p>兩項都符合的食物：{{ data.independentfoods }}</p>
+          <button type="button"  @click="update()" class="btn btn-success w-100">
             確定
           </button>
         </div>
@@ -106,30 +153,40 @@ export default {
         Answer1: "",
         Answer2: "",
         tagsfoods: [],
+        independentfoods: [],
       },
       foods: [],
+      foodstype:[],
       len: 0,
-      questions:[]
+      questions: [],
     };
+  },
+  watch:{
+    foodstype: {
+      handler:function(){
+        this.checkAnswer();
+      },
+      deep: true
+    }
   },
   methods: {
     typeinStart: function () {
-      if((this.data.question!=="") &  (this.data.Answer1!=="") & (this.data.Answer2!=="")){
+      if (
+        (this.data.question !== "") &
+        (this.data.Answer1 !== "") &
+        (this.data.Answer2 !== "")
+      ) {
         this.typein = true;
-      }else{
-        alert("請輸入問題與其回答選項！")
+      } else {
+        alert("請輸入問題與其回答選項！");
       }
     },
-    checkAnswer: function (food) {
-      if (this.data.tagsfoods.indexOf(food) != -1) {
-        this.data.tagsfoods.splice(this.data.tagsfoods.indexOf(food), 1);
-      } else {
-        this.data.tagsfoods.push(food);
-      }
+    checkAnswer: function () {
+      this.data.tagsfoods=this.foods.filter(food=>this.foodstype[this.foods.indexOf(food)]=="1")
+      this.data.independentfoods=this.foods.filter(food=>this.foodstype[this.foods.indexOf(food)]=="nvm")
     },
     update: function () {
       var Ref = {};
-      console.log(this.data);
       Ref[this.len] = this.data;
       firebase.database().ref("watsdinner/data").update(Ref);
       this.refresh();
@@ -141,13 +198,14 @@ export default {
         .once("value", (snapshot) => {
           this.foods = snapshot.val();
           this.foods = this.foods.map((item) => item.name);
+          this.foodstype= this.foods.map(() => "0");
         });
       firebase
         .database()
         .ref("watsdinner/data")
         .once("value", (snapshot) => {
           this.len = snapshot.val().length;
-          this.questions = snapshot.val().map((item)=>item.question)
+          this.questions = snapshot.val().map((item) => item.question);
         });
       this.typein = false;
       this.data = {
@@ -155,6 +213,7 @@ export default {
         Answer1: "",
         Answer2: "",
         tagsfoods: [],
+        independentfoods: [],
       };
     },
   },
@@ -165,6 +224,7 @@ export default {
       .once("value", (snapshot) => {
         this.foods = snapshot.val();
         this.foods = this.foods.map((item) => item.name);
+        this.foodstype= this.foods.map(() => "0");
       });
 
     firebase
@@ -172,7 +232,7 @@ export default {
       .ref("watsdinner/data")
       .once("value", (snapshot) => {
         this.len = snapshot.val().length;
-        this.questions = snapshot.val().map((item)=>item.question)
+        this.questions = snapshot.val().map((item) => item.question);
       });
   },
 };
@@ -183,14 +243,14 @@ export default {
 #question_form .col-12,
 #question_form .col-6,
 #question_form input {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 .fooditems:nth-of-type(even) {
-  background: #EEEEEE;
+  background: #eeeeee;
 }
 
 .fooditems {
-  padding: 8px;
+  height: 3.5rem;
 }
 </style>

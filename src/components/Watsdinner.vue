@@ -56,6 +56,7 @@ export default {
       ],
       foods: {},
       tag: "",
+      tagsfoods: [],
     };
   },
   methods: {
@@ -66,21 +67,27 @@ export default {
         if (statement == "nvm") {
           this.nextQuestion();
         } else {
-          console.log(this.tagsfoods);
-          this.foods = this.foods.filter(
-            (x) =>
-              this.data[this.question_count - 1].tagsfoods.includes(x) ===
-              statement
-          );
+          this.checkTagsfoods(this.question_count - 1, statement);
           this.nextQuestion();
         }
       }
     },
+    checkTagsfoods: function (num, statement) {
+      if (statement) {
+        this.foods = this.foods.filter(
+          (x) =>
+            this.data[num].tagsfoods.includes(x) |
+            this.data[num].independentfoods.includes(x)
+        );
+      } else {
+        this.foods = this.foods.filter(
+          (x) => this.data[num].tagsfoods.includes(x) === false
+        );
+      }
+    },
     nextQuestion: function () {
       var loop = true;
-
       while (loop) {
-        console.log(this.question_count);
         if (
           (this.foods.length <= 5) |
           (this.question_count == this.question_length)
@@ -90,9 +97,14 @@ export default {
           break;
         } else {
           if (
-            this.foods.filter((x) =>
-              this.data[this.question_count].tagsfoods.includes(x)
-            ).length == 0
+            (this.foods.filter(
+              (x) =>
+                this.data[this.question_count].tagsfoods.includes(x) |
+                this.data[this.question_count].independentfoods.includes(x)
+            ).length == 0) |
+            this.foods.filter(
+              (x) => this.data[this.question_count].tagsfoods.includes(x) === false
+            )
           ) {
             this.question_count++;
             continue;
@@ -128,7 +140,6 @@ export default {
           this.Answer2 = this.data[0].Answer2;
           this.question_length = this.data.length;
           this.tagsfoods = this.data[0].tagsfoods;
-          console.log(this.data[0]);
           document.getElementsByClassName("Watsdinner")[0].className =
             "Watsdinner";
         });
@@ -154,7 +165,6 @@ export default {
         this.Answer2 = this.data[0].Answer2;
         this.tagsfoods = this.data[0].tagsfoods;
         this.question_length = this.data.length;
-        console.log(this.data[0]);
         document.getElementsByClassName("Watsdinner")[0].className =
           "Watsdinner";
       });
