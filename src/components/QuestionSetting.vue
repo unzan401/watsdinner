@@ -48,7 +48,18 @@
           </button>
         </div>
       </div>
-      <div class="row bg-white" style="position: sticky; top: 50px;padding:10px 0;margin-top:10px;margin-bottom:10px;border-top:#DDDDDD 1px solid;border-bottom:#DDDDDD 1px solid;">
+      <div
+        class="row bg-white"
+        style="
+          position: sticky;
+          top: 50px;
+          padding: 10px 0;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          border-top: #dddddd 1px solid;
+          border-bottom: #dddddd 1px solid;
+        "
+      >
         <h3 class="mt-2">預覽</h3>
         <h1>{{ data.question }}</h1>
         <div class="col-6">
@@ -178,10 +189,18 @@ export default {
         .ref("watsdinner/data")
         .once("value", (snapshot) => {
           this.data = snapshot.val()[index];
+          var tagsfoods = this.data.tagsfoods;
+          var independentfoods = this.data.independentfoods;
+          if (tagsfoods == undefined) {
+            tagsfoods = [];
+          }
+          if (independentfoods == undefined) {
+            independentfoods = [];
+          }
           this.foodstype = this.foodstype.map((x, index) => {
-            if (this.data.tagsfoods.includes(this.foods[index])) {
+            if (tagsfoods.includes(this.foods[index])) {
               return "1";
-            } else if (this.data.independentfoods.includes(this.foods[index])) {
+            } else if (independentfoods.includes(this.foods[index])) {
               return "nvm";
             } else {
               return "0";

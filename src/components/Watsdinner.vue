@@ -73,11 +73,19 @@ export default {
       }
     },
     checkTagsfoods: function (num, statement) {
+      var tagsfoods = this.data[num].tagsfoods;
+      var independentfoods = this.data[num].independentfoods;
+      if (tagsfoods == undefined) {
+        tagsfoods = [];
+      }
+      if (independentfoods == undefined) {
+        independentfoods = [];
+      }
       if (statement) {
         this.foods = this.foods.filter(
           (x) =>
-            this.data[num].tagsfoods.includes(x) |
-            this.data[num].independentfoods.includes(x)
+            tagsfoods.includes(x) |
+            independentfoods.includes(x)
         );
       } else {
         this.foods = this.foods.filter(
@@ -90,21 +98,27 @@ export default {
       while (loop) {
         if (
           (this.foods.length <= 5) |
-          (this.question_count == this.question_length)
+          (this.question_count == this.question_length - 1)
         ) {
           this.getResult();
           this.question_count = 1;
           break;
         } else {
+          var tagsfoods = this.data[this.question_count].tagsfoods;
+          var independentfoods =
+            this.data[this.question_count].independentfoods;
+          if (tagsfoods == undefined) {
+            tagsfoods = [];
+          }
+          if (independentfoods == undefined) {
+            independentfoods = [];
+          }
           if (
             (this.foods.filter(
-              (x) =>
-                this.data[this.question_count].tagsfoods.includes(x) |
-                this.data[this.question_count].independentfoods.includes(x)
-            ).length == 0) |
-            this.foods.filter(
-              (x) => this.data[this.question_count].tagsfoods.includes(x) === false
-            )
+              (x) => tagsfoods.includes(x) | independentfoods.includes(x)
+            ).length ==
+              0) |
+            this.foods.filter((x) => tagsfoods.includes(x) === false)
           ) {
             this.question_count++;
             continue;
@@ -140,6 +154,7 @@ export default {
           this.Answer2 = this.data[0].Answer2;
           this.question_length = this.data.length;
           this.tagsfoods = this.data[0].tagsfoods;
+
           document.getElementsByClassName("Watsdinner")[0].className =
             "Watsdinner";
         });
