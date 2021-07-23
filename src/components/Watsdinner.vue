@@ -89,7 +89,7 @@ export default {
         );
       } else {
         this.foods = this.foods.filter(
-          (x) => this.data[num].tagsfoods.includes(x) === false
+          (x) => tagsfoods.includes(x) === false
         );
       }
     },
