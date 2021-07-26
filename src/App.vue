@@ -3,7 +3,7 @@
     <!-- Fixed navbar -->
     <nav class="navbar navbar-expand-md navbar-light bg-white fixed-top">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">{{ Title }}</a>
+        <router-link class="navbar-brand" to="/">{{ Title }}</router-link>
         <button
           class="navbar-toggler"
           type="button"
@@ -17,11 +17,8 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav me-auto mb-2 mb-md-0">
-            <!-- <li class="nav-item">
-              <router-link class="nav-link" to="/">Home</router-link>
-            </li> -->
             <li class="nav-item">
-              <router-link class="nav-link" to="/watsdinner"
+              <router-link class="nav-link" to="/"
                 >Watsdinner</router-link
               >
             </li>
@@ -31,17 +28,6 @@
               >
             </li>
           </ul>
-          <form class="d-flex">
-            <input
-              class="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-            />
-            <button class="btn btn-outline-success" type="submit">
-              Search
-            </button>
-          </form>
         </div>
       </div>
     </nav>
@@ -61,18 +47,6 @@ export default {
   },
 };
 </script>
-    <style>
-.bd-placeholder-img {
-  font-size: 1.125rem;
-  text-anchor: middle;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
+<style>
 
-@media (min-width: 768px) {
-  .bd-placeholder-img-lg {
-    font-size: 3.5rem;
-  }
-}
 </style>

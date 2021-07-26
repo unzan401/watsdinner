@@ -2,14 +2,7 @@
   <div class="QuestionSetting">
     <div class="container">
       <div class="row" id="question_form" v-if="typein == false">
-        <div class="col-12">
-          資料庫已經有的分類問題：
-          <ol>
-            <li v-for="(question, index) in questions" :key="question.id">
-              <a href="#" @click="changeQuestion(index)">{{ question }}</a>
-            </li>
-          </ol>
-        </div>
+
         <div class="col-12">
           分類用的問題：<input
             type="text"
@@ -47,7 +40,9 @@
             確定
           </button>
         </div>
+        
       </div>
+      
       <div
         class="row bg-white"
         style="
@@ -73,6 +68,14 @@
           </button>
         </div>
       </div>
+      <div class="col-12" v-if="typein == false">
+          資料庫已經有的分類問題：
+          <ol>
+            <li v-for="(question, index) in questions" :key="question.id">
+              <a href="#" onclick="return false" @click="changeQuestion(index)">{{ question }}</a>
+            </li>
+          </ol>
+        </div>
       <div class="row" v-if="typein">
         <div class="col-12">
           <h4>請勾選符合問題的食物</h4>
@@ -179,6 +182,8 @@ export default {
         (this.data.Answer2 !== "")
       ) {
         this.typein = true;
+        window.history.pushState([],"/");
+        window.onpopstate=this.refresh
       } else {
         alert("請輸入問題與其回答選項！");
       }
@@ -209,7 +214,10 @@ export default {
         });
       this.typein = true;
       this.changein = true;
+      window.history.pushState([],"/");
+      window.onpopstate=this.refresh
       this.questionIndex = index;
+      return false
     },
     checkAnswer: function () {
       this.data.tagsfoods = this.foods.filter(
