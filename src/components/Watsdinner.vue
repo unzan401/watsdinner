@@ -1,5 +1,16 @@
 <template>
-  <div class="Watsdinner d-none">
+  <div class="container" v-if="open == 1">
+    <h1>為煩惱吃什麼的人給個方向！</h1>
+    <p>中餐吃什麼？晚餐吃什麼？這是大家常見的問題！</p>
+    <p>但一直都沒有合適的決策方式，如果能有人幫我決定我想吃的食物就好了。</p>
+    <div class="col-12">
+      <button type="button" @click="start()" class="btn btn-success w-100">
+        立刻開始
+      </button>
+    </div>
+  </div>
+
+  <div class="Watsdinner" v-if="open == 2">
     <div class="container">
       <div class="row" style="min-height: 200px; align-items: center">
         <h1>{{ question }}</h1>
@@ -32,12 +43,81 @@
         </div>
       </div>
     </div>
+
+
   </div>
+
+      <div class="modal fade" tabindex="-1" id="questionnaire">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="container">
+              <h1>在開始之前，協助我們預測得更好！</h1>
+              <p>
+                在下列問題中，你認為針對<span
+                  class="text-danger"
+                  style="font"
+                  >{{ food }}</span
+                >而言，<span
+                  class="text-danger"
+                  style="font"
+                  >{{ food }}</span
+                >應該會在哪個選項中出現？
+              </p>
+              <div
+                class="w-100"
+                style="height: 1px; background-color: #bbbbbb; margin: 20px 0"
+              ></div>
+              <div class="row" style="min-height: 200px; align-items: center">
+                <h1>{{ testQuestion.question }}</h1>
+                <div class="col-6">
+                  <button
+                    type="button"
+                    @click="testAnswer(true)"
+                    class="btn btn-primary w-100"
+                  >
+                    {{ testQuestion.Answer1 }}
+                  </button>
+                </div>
+                <div class="col-6">
+                  <button
+                    type="button"
+                    @click="testAnswer(false)"
+                    class="btn btn-secondary w-100"
+                  >
+                    {{ testQuestion.Answer2 }}
+                  </button>
+                </div>
+                <div class="col-12">
+                  <button
+                    type="button"
+                    @click="testAnswer('nvm')"
+                    class="btn btn-success w-100"
+                  >
+                    都可以
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 </template>
 
 <script>
 import { firebase } from "../model/FirebaseModel";
-
+import bootstrap from 'bootstrap/dist/js/bootstrap.min.js'
+var myModal;
 export default {
   name: "Watsdinner",
   data: () => {
@@ -57,9 +137,31 @@ export default {
       foods: {},
       tag: "",
       tagsfoods: [],
+      open: 1,
+      food: "",
+      testQuestion: [
+        {
+          question: "",
+          Answer1: "",
+          Answer2: "",
+        },
+      ],
     };
   },
   methods: {
+    start: function () {
+      this.open = 2;
+      myModal.show()
+    },
+    testAnswer: function (statement) {
+      var Ref = {
+        food: this.food,
+        question: this.testQuestion.question,
+        answer: statement,
+      };
+      firebase.database().ref("watsdinner/questionnaire").push(Ref);
+      myModal.hide()
+    },
     answer: function (statement) {
       if (this.tag == "end") {
         this.refresh();
@@ -83,14 +185,10 @@ export default {
       }
       if (statement) {
         this.foods = this.foods.filter(
-          (x) =>
-            tagsfoods.includes(x) |
-            independentfoods.includes(x)
+          (x) => tagsfoods.includes(x) | independentfoods.includes(x)
         );
       } else {
-        this.foods = this.foods.filter(
-          (x) => tagsfoods.includes(x) === false
-        );
+        this.foods = this.foods.filter((x) => tagsfoods.includes(x) === false);
       }
     },
     nextQuestion: function () {
@@ -154,9 +252,6 @@ export default {
           this.Answer2 = this.data[0].Answer2;
           this.question_length = this.data.length;
           this.tagsfoods = this.data[0].tagsfoods;
-
-          document.getElementsByClassName("Watsdinner")[0].className =
-            "Watsdinner";
         });
       firebase
         .database()
@@ -169,6 +264,7 @@ export default {
     },
   },
   created() {
+
     firebase
       .database()
       .ref("watsdinner/data")
@@ -180,8 +276,7 @@ export default {
         this.Answer2 = this.data[0].Answer2;
         this.tagsfoods = this.data[0].tagsfoods;
         this.question_length = this.data.length;
-        document.getElementsByClassName("Watsdinner")[0].className =
-          "Watsdinner";
+        this.testQuestion = this.data[this.data.length - 1];
       });
     firebase
       .database()
@@ -189,8 +284,12 @@ export default {
       .once("value", (snapshot) => {
         this.foods = snapshot.val();
         this.foods = this.foods.map((item) => item.name);
+        this.food = this.foods[Math.floor(this.foods.length * Math.random())];
       });
   },
+  mounted() {
+    myModal = new bootstrap.Modal(document.getElementById('questionnaire'));
+  }
 };
 </script>
 
