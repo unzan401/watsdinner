@@ -1,17 +1,18 @@
 <template>
-  <div class="container" v-if="open == 1">
-    <h1>為煩惱吃什麼的人給個方向！</h1>
-    <p>中餐吃什麼？晚餐吃什麼？這是大家常見的問題！</p>
-    <p>但一直都沒有合適的決策方式，如果能有人幫我決定我想吃的食物就好了。</p>
-    <div class="col-12">
-      <button type="button" @click="start()" class="btn btn-success w-100">
-        立刻開始
-      </button>
+  <div class="Watsdinner">
+    <div class="container" v-if="open == 1">
+      <h1>為煩惱吃什麼的人給個方向！</h1>
+      <p>中餐吃什麼？晚餐吃什麼？這是大家常見的問題！</p>
+      <p>但一直都沒有合適的決策方式，如果能有人幫我決定我想吃的食物就好了。</p>
+      <p>透過一連串的選項篩選出可能想吃的食物，最終解決亙古無解的吃什麼問題。</p>
+      <div class="col-12">
+        <button type="button" @click="start()" class="btn btn-success w-100">
+          立刻開始
+        </button>
+      </div>
     </div>
-  </div>
 
-  <div class="Watsdinner" v-if="open == 2">
-    <div class="container">
+    <div class="container" v-if="open == 2">
       <div class="row" style="min-height: 200px; align-items: center">
         <h1>{{ question }}</h1>
         <div class="col-6">
@@ -37,21 +38,17 @@
             type="button"
             @click="answer('nvm')"
             class="btn btn-success w-100"
-          >
+          v-if="tag=end">
             都可以
           </button>
         </div>
       </div>
     </div>
-
-
-  </div>
-
-      <div class="modal fade" tabindex="-1" id="questionnaire">
-      <div class="modal-dialog modal-fullscreen">
+    <div class="modal fade" tabindex="-1" id="questionnaire">
+      <div class="modal-dialog modal-fullscreen align-items-center">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title"></h5>
+            <h5 class="modal-title">問卷調查</h5>
             <button
               type="button"
               class="btn-close"
@@ -67,10 +64,7 @@
                   class="text-danger"
                   style="font"
                   >{{ food }}</span
-                >而言，<span
-                  class="text-danger"
-                  style="font"
-                  >{{ food }}</span
+                >而言，<span class="text-danger" style="font">{{ food }}</span
                 >應該會在哪個選項中出現？
               </p>
               <div
@@ -112,11 +106,15 @@
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
 import { firebase } from "../model/FirebaseModel";
-import bootstrap from 'bootstrap/dist/js/bootstrap.min.js'
+import bootstrap from "bootstrap/dist/js/bootstrap.min.js";
+
+
+
 var myModal;
 export default {
   name: "Watsdinner",
@@ -151,7 +149,7 @@ export default {
   methods: {
     start: function () {
       this.open = 2;
-      myModal.show()
+      myModal.show();
     },
     testAnswer: function (statement) {
       var Ref = {
@@ -160,7 +158,7 @@ export default {
         answer: statement,
       };
       firebase.database().ref("watsdinner/questionnaire").push(Ref);
-      myModal.hide()
+      myModal.hide();
     },
     answer: function (statement) {
       if (this.tag == "end") {
@@ -232,9 +230,10 @@ export default {
     },
     getResult: function () {
       if (this.foods.length == 0) {
-        this.question = "看來你今天一點也不想吃";
+        this.question = "看來你今天一點也不想吃。";
       } else {
-        this.question = "我認為你可能想吃" + this.foods;
+        this.question = "我認為你可能想吃" + this.foods + "。";
+        
       }
       this.Answer1 = "太棒了";
       this.Answer2 = "天啊，我不要";
@@ -264,7 +263,6 @@ export default {
     },
   },
   created() {
-
     firebase
       .database()
       .ref("watsdinner/data")
@@ -288,8 +286,8 @@ export default {
       });
   },
   mounted() {
-    myModal = new bootstrap.Modal(document.getElementById('questionnaire'));
-  }
+    myModal = new bootstrap.Modal(document.getElementById("questionnaire"));
+  },
 };
 </script>
 
@@ -299,5 +297,13 @@ export default {
 .col-6 {
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.Watsdinner {
+  padding: 100px 0;
+}
+
+h1 {
+  margin-bottom: 2rem;
 }
 </style>

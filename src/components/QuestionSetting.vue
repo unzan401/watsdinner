@@ -1,8 +1,12 @@
 <template>
   <div class="QuestionSetting">
-    <div class="container">
+    <div
+      class="container"
+      id="firebaseui-auth-container"
+      v-if="login == false"
+    ></div>
+    <div class="container" v-if="login">
       <div class="row" id="question_form" v-if="typein == false">
-
         <div class="col-12">
           分類用的問題：<input
             type="text"
@@ -40,9 +44,8 @@
             確定
           </button>
         </div>
-        
       </div>
-      
+
       <div
         class="row bg-white"
         style="
@@ -69,13 +72,15 @@
         </div>
       </div>
       <div class="col-12" v-if="typein == false">
-          資料庫已經有的分類問題：
-          <ol>
-            <li v-for="(question, index) in questions" :key="question.id">
-              <a href="#" onclick="return false" @click="changeQuestion(index)">{{ question }}</a>
-            </li>
-          </ol>
-        </div>
+        資料庫已經有的分類問題：
+        <ol>
+          <li v-for="(question, index) in questions" :key="question.id">
+            <a href="#" onclick="return false" @click="changeQuestion(index)">{{
+              question
+            }}</a>
+          </li>
+        </ol>
+      </div>
       <div class="row" v-if="typein">
         <div class="col-12">
           <h4>請勾選符合問題的食物</h4>
@@ -147,6 +152,8 @@
 
 <script>
 import { firebase } from "../model/FirebaseModel";
+var firebaseui = require("firebaseui");
+var ui = new firebaseui.auth.AuthUI(firebase.auth());
 
 export default {
   name: "QuestionSetting",
@@ -164,6 +171,7 @@ export default {
       foodstype: [],
       len: 0,
       questions: [],
+      login: false,
     };
   },
   watch: {
@@ -182,8 +190,8 @@ export default {
         (this.data.Answer2 !== "")
       ) {
         this.typein = true;
-        window.history.pushState([],"/");
-        window.onpopstate=this.refresh
+        window.history.pushState([], "/");
+        window.onpopstate = this.refresh;
       } else {
         alert("請輸入問題與其回答選項！");
       }
@@ -214,10 +222,10 @@ export default {
         });
       this.typein = true;
       this.changein = true;
-      window.history.pushState([],"/");
-      window.onpopstate=this.refresh
+      window.history.pushState([], "/");
+      window.onpopstate = this.refresh;
       this.questionIndex = index;
-      return false
+      return false;
     },
     checkAnswer: function () {
       this.data.tagsfoods = this.foods.filter(
@@ -265,6 +273,9 @@ export default {
     },
   },
   created() {
+    if (document.cookie.indexOf("username")!=-1) {
+      this.login = true;
+    }
     firebase
       .database()
       .ref("watsdinner/foods")
@@ -281,6 +292,53 @@ export default {
         this.len = snapshot.val().length;
         this.questions = snapshot.val().map((item) => item.question);
       });
+  },
+  mounted() {
+    if (this.login==false){
+    var uiConfig = {
+      callbacks: {
+        signInSuccessWithAuthResult: (currentUser) => {
+          // User successfully signed in.
+          // Return type determines whether we continue the redirect automatically
+          // or whether we leave that to developer to handle.
+          document.cookie =
+            "username=" + currentUser.user.email + "; max-age=2592000; path=/";
+          this.login = true;
+          return false;
+        },
+      },
+      // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+      signInFlow: "popup",
+      signInSuccessUrl: window.location.href,
+      signInOptions: [
+        {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          signInMethod:
+            firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+          // Allow the user the ability to complete sign-in cross device,
+          // including the mobile apps specified in the ActionCodeSettings
+          // object below.
+          forceSameDevice: false,
+          // Used to define the optional firebase.auth.ActionCodeSettings if
+          // additional state needs to be passed along request and whether to open
+          // the link in a mobile app if it is installed.
+          emailLinkSignIn: function () {
+            return {
+              // Additional state showPromo=1234 can be retrieved from URL on
+              // sign-in completion in signInSuccess callback by checking
+              // window.location.href.
+              url: window.location.href,
+              // Always true for email link sign-in.
+              handleCodeInApp: true,
+            };
+          },
+        },
+      ],
+
+    };
+    
+    ui.start("#firebaseui-auth-container", uiConfig);
+    }
   },
 };
 </script>

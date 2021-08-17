@@ -2,6 +2,7 @@
 // 這個等於當初第一個 script 標籤
 import firebase from "firebase/app";
 
+
 // 後面都是 import 第一個後才能接著 import 的各模塊
 // 這個等於當初第二個 script 標籤
 

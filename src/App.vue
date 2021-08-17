@@ -3,7 +3,7 @@
     <!-- Fixed navbar -->
     <nav class="navbar navbar-expand-md navbar-light bg-white fixed-top">
       <div class="container-fluid">
-        <router-link class="navbar-brand" to="/">{{ Title }}</router-link>
+        <router-link class="navbar-brand" to="/" style="font-family: 'Noto Serif TC', serif;"><img src="/favicon.ico" alt="吃什麼logo" style="height:30px;width:30px;vertical-align: bottom;">{{ Title }}</router-link>
         <button
           class="navbar-toggler"
           type="button"
@@ -15,16 +15,10 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-          <ul class="navbar-nav me-auto mb-2 mb-md-0">
-            <li class="nav-item">
-              <router-link class="nav-link" to="/QuestionSetting"
-                >QuestionSetting</router-link
-              >
-            </li>
-          </ul>
-        </div>
       </div>
+          <router-link class="nav-link text-light" to="/QuestionSetting" style="margin-right:50px
+          " >login</router-link>
+
     </nav>
   </header>
 
@@ -32,12 +26,13 @@
   <div class="container" style="padding-top: 60px">
     <router-view />
   </div>
+
 </template>
 <script>
 export default {
   data: () => {
     return {
-      Title: "Watsdinner",
+      Title: "吃什麼？",
     };
   },
 };
